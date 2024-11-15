@@ -28,7 +28,7 @@ Future<void> registerUser(
   String password,
 ) async {
   final response = await http.post(
-    Uri.parse('http://10.0.2.2:5079/api/register'), // Ensure '/api' is included
+    Uri.parse('http://cop4331-t23.xyz/:5079/api/register'), // Ensure '/api' is included
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'firstName': firstName,
@@ -45,7 +45,7 @@ Future<void> registerUser(
 
 Future<void> loginUser(String login, String password) async {
   final response = await http.post(
-    Uri.parse('http://10.0.2.2:5079/api/login'), // Ensure '/api' is included
+    Uri.parse('http://cop4331-t23.xyz/:5079/api/login'), // Ensure '/api' is included
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'login': login, // Changed from 'email' to 'login'
