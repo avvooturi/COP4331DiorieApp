@@ -20,6 +20,14 @@ class _AccountPageState extends State<AccountPage> {
   final _proteinController = TextEditingController();
   final _fatController = TextEditingController();
 
+  bool _isUserHealthInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserHealth();
+  }
+
   @override
   void dispose() {
     _calorieController.dispose();
@@ -29,6 +37,24 @@ class _AccountPageState extends State<AccountPage> {
     super.dispose();
   }
 
+  Future<void> _checkUserHealth() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'http://cop4331-t23.xyz:5079/api/getuserhealth/${widget.objectId}'),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _isUserHealthInitialized = true;
+        });
+      }
+    } catch (error) {
+      // Log error or handle it
+      print("Error checking user health: $error");
+    }
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final calorieIntake = int.tryParse(_calorieController.text) ?? 0;
@@ -36,26 +62,47 @@ class _AccountPageState extends State<AccountPage> {
       final protein = int.tryParse(_proteinController.text) ?? 0;
       final fat = int.tryParse(_fatController.text) ?? 0;
 
-      try {
-        final response = await http.post(
-          Uri.parse('http://cop4331-t23.xyz:5079/api/createuserhealth'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'userId': widget.objectId,
-            'cal': calorieIntake,
-            'carb': carbs,
-            'prot': protein,
-            'fat': fat,
-          }),
-        );
+      final url = _isUserHealthInitialized
+          ? 'http://cop4331-t23.xyz:5079/api/updateuserhealth'
+          : 'http://cop4331-t23.xyz:5079/api/createuserhealth';
 
-        if (response.statusCode == 201) {
+      final body = jsonEncode({
+        'userId': widget.objectId,
+        'cal': calorieIntake,
+        'carb': carbs,
+        'prot': protein,
+        'fat': fat,
+      });
+
+      try {
+        final response = _isUserHealthInitialized
+            ? await http.put(
+                Uri.parse(url),
+                headers: {'Content-Type': 'application/json'},
+                body: body,
+              )
+            : await http.post(
+                Uri.parse(url),
+                headers: {'Content-Type': 'application/json'},
+                body: body,
+              );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Details saved successfully!')),
+            SnackBar(
+                content: Text(_isUserHealthInitialized
+                    ? 'Details updated successfully!'
+                    : 'Details saved successfully!')),
           );
+
+          if (!_isUserHealthInitialized) {
+            setState(() {
+              _isUserHealthInitialized = true;
+            });
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save details: ${response.body}')),
+            SnackBar(content: Text('Failed: ${response.body}')),
           );
         }
       } catch (error) {
@@ -133,7 +180,9 @@ class _AccountPageState extends State<AccountPage> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _submitForm,
-                    child: Text('Save Details'),
+                    child: Text(_isUserHealthInitialized
+                        ? 'Update Details'
+                        : 'Save Details'),
                   ),
                 ],
               ),
