@@ -55,7 +55,6 @@ class _AccountPageState extends State<AccountPage> {
           _isUserHealthInitialized = true;
         });
       } else if (response.statusCode == 404) {
-        // No user health entry exists, leave fields empty
         setState(() {
           _isUserHealthInitialized = false;
         });
@@ -120,6 +119,37 @@ class _AccountPageState extends State<AccountPage> {
           SnackBar(content: Text('Error: $error')),
         );
       }
+    }
+  }
+
+  Future<void> _deleteUserHealth() async {
+    try {
+      final response = await http.delete(
+        Uri.parse(
+            'http://cop4331-t23.xyz:5079/api/deleteuserhealth/${widget.objectId}'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Details deleted successfully!')),
+        );
+        setState(() {
+          _calorieController.clear();
+          _carbsController.clear();
+          _proteinController.clear();
+          _fatController.clear();
+          _isUserHealthInitialized = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: ${response.body}')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
     }
   }
 
@@ -194,6 +224,16 @@ class _AccountPageState extends State<AccountPage> {
                         ? 'Update Details'
                         : 'Save Details'),
                   ),
+                  if (_isUserHealthInitialized) ...[
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: _deleteUserHealth,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      child: Text('Delete Details'),
+                    ),
+                  ],
                 ],
               ),
             ),
