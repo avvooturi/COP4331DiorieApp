@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'homepage.dart';
 
 void main() {
   runApp(MyApp());
@@ -46,15 +47,15 @@ Future<void> registerUser(
 
 Future<void> loginUser(String login, String password) async {
   final response = await http.post(
-    Uri.parse(
-        'http://cop4331-t23.xyz:5079/api/login'), // Ensure '/api' is included
+    Uri.parse('http://cop4331-t23.xyz:5079/api/login'),
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'login': login, // Changed from 'email' to 'login'
-      'password': password,
-    }),
+    body: jsonEncode({'login': login, 'password': password}),
   );
-  if (response.statusCode != 200) {
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['firstName']; // Assuming the response contains 'firstName'
+  } else {
     throw Exception('Failed to login: ${response.body}');
   }
 }
@@ -236,7 +237,9 @@ class _LoginPageState extends State<LoginPage> {
       await loginUser(_loginController.text, _passwordController.text);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const QuizPage()),
+        MaterialPageRoute(
+          builder: (context) => HomePage(name: _loginController.text),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -337,7 +340,9 @@ class _RegisterPageState extends State<RegisterPage> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const QuizPage()),
+        MaterialPageRoute(
+          builder: (context) => HomePage(name: _loginController.text),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

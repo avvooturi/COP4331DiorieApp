@@ -15,10 +15,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
   final List<Map<String, dynamic>> _meals = [];
   final List<Map<String, dynamic>> _calendarRecipes = [];
 
-  // Function to handle recipe added from CustomRecipesPage
   void _addRecipeToCalendar(Map<String, dynamic> recipe) {
     setState(() {
       _calendarRecipes.add(recipe);
@@ -34,29 +35,53 @@ class _HomePageState extends State<HomePage> {
     );
     if (newMeal != null) {
       setState(() {
-        _meals.add(newMeal); // Add the new meal to the _meals list
+        _meals.add(newMeal);
       });
     }
   }
 
-  // Navigate to CustomRecipesPage
-  void _navigateToCustomRecipesPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CustomRecipesPage(
-          onRecipeAdded: _addRecipeToCalendar,
-        ),
-      ),
-    );
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
-  // Navigate to CalendarPage with scheduled recipes
-  void _navigateToCalendarPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CalendarPage(scheduledRecipes: _calendarRecipes),
+  Widget _buildPage() {
+    switch (_selectedIndex) {
+      case 0:
+        return _buildHomePage();
+      case 1:
+        return Center(child: Text('Account Page'));
+      case 2:
+        return FoodLogPage(meals: _meals);
+      case 3:
+        return CustomRecipesPage(onRecipeAdded: _addRecipeToCalendar);
+      case 4:
+        return CalendarPage(scheduledRecipes: _calendarRecipes);
+      default:
+        return _buildHomePage();
+    }
+  }
+
+  Widget _buildHomePage() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Hi ${widget.name}, please input the meals you eat into the food log!',
+              style: const TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _navigateToFoodLogPage,
+              child: const Text('Go to Food Log'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -67,35 +92,34 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Hi ${widget.name}, please input the meals you eat into the food log!',
-                style: const TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _navigateToFoodLogPage,
-                child: const Text('Go to Food Log'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _navigateToCustomRecipesPage,
-                child: const Text('Go to Custom Recipes'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _navigateToCalendarPage,
-                child: const Text('View Recipe Calendar'),
-              ),
-            ],
+      body: _buildPage(),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Account',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.fastfood),
+            label: 'Food Log',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt),
+            label: 'Recipes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.green[800],
+        unselectedItemColor: Colors.green, // Set this to make all items green
+        onTap: _onItemTapped,
       ),
     );
   }
