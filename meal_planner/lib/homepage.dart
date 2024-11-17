@@ -54,8 +54,7 @@ class _HomePageState extends State<HomePage> {
       case 0:
         return _buildHomePage();
       case 1:
-        return AccountPage(
-            objectId: widget.objectId); // Navigate to AccountPage
+        return AccountPage(objectId: widget.objectId, name: widget.name);
       case 2:
         return FoodLogPage(meals: _meals);
       case 3:
