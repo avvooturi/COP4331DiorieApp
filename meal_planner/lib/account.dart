@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AccountPage extends StatefulWidget {
   final String objectId;
@@ -27,17 +29,40 @@ class _AccountPageState extends State<AccountPage> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final calorieIntake = _calorieController.text;
-      final carbs = _carbsController.text;
-      final protein = _proteinController.text;
-      final fat = _fatController.text;
+      final calorieIntake = int.tryParse(_calorieController.text) ?? 0;
+      final carbs = int.tryParse(_carbsController.text) ?? 0;
+      final protein = int.tryParse(_proteinController.text) ?? 0;
+      final fat = int.tryParse(_fatController.text) ?? 0;
 
-      // Process the data (e.g., send it to a server or save locally)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Details saved successfully!')),
-      );
+      try {
+        final response = await http.post(
+          Uri.parse('http://cop4331-t23.xyz:5079/api/createuserhealth'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'userId': widget.objectId,
+            'cal': calorieIntake,
+            'carb': carbs,
+            'prot': protein,
+            'fat': fat,
+          }),
+        );
+
+        if (response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Details saved successfully!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save details: ${response.body}')),
+          );
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      }
     }
   }
 

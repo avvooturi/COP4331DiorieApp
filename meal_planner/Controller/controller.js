@@ -429,38 +429,49 @@ export const deletemeal = async (req, res) => {
 //userHealth Collection------------------
 //createuserhealth(should only be used once)
 //input:(all UserHealth fields)
+// Import necessary modules and initialize UserHealth schema
+
 export const createuserhealth = async (req, res) => {
     try {
-        //check for duplicates
-        const dup = await UserHealth.findOne({userId : req.body.userId})
-        if(dup){
+        // Log incoming request data for debugging
+        console.log("Received data:", req.body);
+
+        // Check for duplicate user health entry
+        const dup = await UserHealth.findOne({ userId: req.body.userId });
+        if (dup) {
             return res.status(400).json({
-                success:false, message: "no duplicate UserHealth"
-            })
+                success: false, message: "Duplicate UserHealth entry detected"
+            });
         }
-        //uses schema 
-        const newUserHealth = new UserHealth(req.body);
+
+        // Create new user health entry
+        const newUserHealth = new UserHealth({
+            userId: req.body.userId,
+            cal: req.body.cal,
+            carb: req.body.carb,
+            prot: req.body.prot,
+            fat: req.body.fat
+        });
+
         await newUserHealth.save();
         return res.status(201).json({
-            success:true, message: "Health info saved", UserHealth: newUserHealth
-        })
+            success: true, message: "Health info saved", UserHealth: newUserHealth
+        });
     } catch (error) {
-        if(error.name== "ValidationError" || error.name== "CastError"){
+        if (error.name == "ValidationError" || error.name == "CastError") {
             return res.status(400).json({
-                success:false,
+                success: false,
                 message: "Invalid input"
-            })
-        }
-        else{
+            });
+        } else {
             return res.status(500).json({
-                success:false,
+                success: false,
                 message: "Internal Server Error"
-            })
+            });
         }
-        
     }
-      
-}
+};
+
 
 //getuserhealth- get users health info 
 //input: userId (from parameters)
