@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'add_meal_page.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class FoodLogPage extends StatefulWidget {
   final List<Map<String, dynamic>> meals;
+  final String objectId; // Add this line
 
-  const FoodLogPage({super.key, required this.meals});
+  const FoodLogPage(
+      {super.key,
+      required this.meals,
+      required this.objectId}); // Update constructor
 
   @override
   State<FoodLogPage> createState() => _FoodLogPageState();
@@ -17,11 +23,32 @@ class _FoodLogPageState extends State<FoodLogPage> {
     final newMeal = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const AddMealPage(),
+        builder: (context) =>
+            AddMealPage(userId: widget.objectId), // Pass objectId here
       ),
     );
+
     if (newMeal != null) {
-      Navigator.pop(context, newMeal); // Pass the meal back to HomePage
+      setState(() {
+        meals.add(newMeal);
+      });
+
+      // Send meal to backend
+      try {
+        final response = await http.post(
+          Uri.parse('http://cop4331-t23.xyz:5079/api/createmeal'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(newMeal),
+        );
+
+        if (response.statusCode == 201) {
+          print('Meal successfully added to the database');
+        } else {
+          print('Failed to add meal to the database: ${response.body}');
+        }
+      } catch (error) {
+        print('Error adding meal to the database: $error');
+      }
     }
   }
 
@@ -46,10 +73,10 @@ class _FoodLogPageState extends State<FoodLogPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Calories: ${meal['calories']}'),
+                      Text('Calories: ${meal['cal']}'),
                       Text('Fat: ${meal['fat']}g'),
-                      Text('Protein: ${meal['protein']}g'),
-                      Text('Carbs: ${meal['carbs']}g'),
+                      Text('Protein: ${meal['prot']}g'),
+                      Text('Carbs: ${meal['carb']}g'),
                     ],
                   ),
                   actions: [

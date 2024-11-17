@@ -265,36 +265,30 @@ export const recipe = async (req, res) => {
     });
 }
 
-//Meal Collection-------------------
-//creates a meal
-//input: (all meal info)
 export const createmeal = async (req, res) => {
+    console.log('Request Body:', req.body); // Log incoming data
     try {
-        //uses schema 
         const newmeal = new Meal(req.body);
         await newmeal.save();
         return res.status(201).json({
-          success:true, message: "Meal succesfully created", meal: newmeal
-        })
-        
+          success: true, message: "Meal successfully created", meal: newmeal
+        });
     } catch (error) {
-        //which type of error is it?
-        //doesnt meet schema 
-        if(error.name== "ValidationError" || error.name== "CastError"){
+        console.error('Error:', error);
+        if (error.name == "ValidationError" || error.name == "CastError") {
           return res.status(400).json({
-            success:false,
-            message: "Invalid input"
-         })
-        }
-        else{
+            success: false,
+            message: "Invalid input",
+          });
+        } else {
           return res.status(500).json({
-            success:false,
-            message: "Internal Server Error"
-         })
+            success: false,
+            message: "Internal Server Error",
+          });
         }
-        
     }
-}
+};
+
 
 //searches for all meals or specific search
 //input:userId, search

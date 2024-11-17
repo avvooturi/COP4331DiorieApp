@@ -1,9 +1,10 @@
-// lib/add_meal_page.dart
-
 import 'package:flutter/material.dart';
+// import 'dart:convert';
 
 class AddMealPage extends StatefulWidget {
-  const AddMealPage({super.key});
+  final String userId;
+
+  const AddMealPage({Key? key, required this.userId}) : super(key: key);
 
   @override
   State<AddMealPage> createState() => _AddMealPageState();
@@ -27,14 +28,27 @@ class _AddMealPageState extends State<AddMealPage> {
   }
 
   void _submitMeal() {
+    if (_nameController.text.isEmpty ||
+        _caloriesController.text.isEmpty ||
+        _fatController.text.isEmpty ||
+        _proteinController.text.isEmpty ||
+        _carbsController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('All fields are required')),
+      );
+      return;
+    }
+
     final meal = {
+      'userId': widget.userId,
       'name': _nameController.text,
-      'calories': _caloriesController.text,
-      'fat': _fatController.text,
-      'protein': _proteinController.text,
-      'carbs': _carbsController.text,
+      'cal': int.parse(_caloriesController.text),
+      'carb': int.parse(_carbsController.text),
+      'prot': int.parse(_proteinController.text),
+      'fat': int.parse(_fatController.text),
     };
-    Navigator.pop(context, meal); // Pass the meal data back to FoodLogPage
+
+    Navigator.pop(context, meal);
   }
 
   @override

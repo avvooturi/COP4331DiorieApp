@@ -33,7 +33,10 @@ class _HomePageState extends State<HomePage> {
     final newMeal = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FoodLogPage(meals: _meals),
+        builder: (context) => FoodLogPage(
+          meals: _meals,
+          objectId: widget.objectId,
+        ),
       ),
     );
     if (newMeal != null) {
@@ -56,7 +59,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return AccountPage(objectId: widget.objectId, name: widget.name);
       case 2:
-        return FoodLogPage(meals: _meals);
+        return FoodLogPage(meals: _meals, objectId: widget.objectId);
       case 3:
         return CustomRecipesPage(onRecipeAdded: _addRecipeToCalendar);
       case 4:
