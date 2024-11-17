@@ -45,13 +45,23 @@ class _AccountPageState extends State<AccountPage> {
       );
 
       if (response.statusCode == 200) {
+        final userHealth = jsonDecode(response.body)['UserHealth'];
+
         setState(() {
+          _calorieController.text = userHealth['cal'].toString();
+          _carbsController.text = userHealth['carb'].toString();
+          _proteinController.text = userHealth['prot'].toString();
+          _fatController.text = userHealth['fat'].toString();
           _isUserHealthInitialized = true;
+        });
+      } else if (response.statusCode == 404) {
+        // No user health entry exists, leave fields empty
+        setState(() {
+          _isUserHealthInitialized = false;
         });
       }
     } catch (error) {
-      // Log error or handle it
-      print("Error checking user health: $error");
+      print("Error fetching user health: $error");
     }
   }
 
