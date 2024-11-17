@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'food_log_page.dart';
 import 'custom_recipes_page.dart';
 import 'calendar_page.dart';
+import 'account.dart';
 
 class HomePage extends StatefulWidget {
   final String name;
+  final String objectId;
 
-  const HomePage({super.key, required this.name});
+  const HomePage({Key? key, required this.name, required this.objectId})
+      : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -51,7 +54,8 @@ class _HomePageState extends State<HomePage> {
       case 0:
         return _buildHomePage();
       case 1:
-        return Center(child: Text('Account Page'));
+        return AccountPage(
+            objectId: widget.objectId); // Navigate to AccountPage
       case 2:
         return FoodLogPage(meals: _meals);
       case 3:

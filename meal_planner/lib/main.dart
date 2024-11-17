@@ -47,15 +47,15 @@ Future<void> registerUser(
 
 Future<void> loginUser(String login, String password) async {
   final response = await http.post(
-    Uri.parse('http://cop4331-t23.xyz:5079/api/login'),
+    Uri.parse(
+        'http://cop4331-t23.xyz:5079/api/login'), // Ensure '/api' is included
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'login': login, 'password': password}),
+    body: jsonEncode({
+      'login': login, // Changed from 'email' to 'login'
+      'password': password,
+    }),
   );
-
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['firstName']; // Assuming the response contains 'firstName'
-  } else {
+  if (response.statusCode != 200) {
     throw Exception('Failed to login: ${response.body}');
   }
 }
@@ -234,13 +234,30 @@ class _LoginPageState extends State<LoginPage> {
 
   void _login() async {
     try {
-      await loginUser(_loginController.text, _passwordController.text);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(name: _loginController.text),
-        ),
+      final response = await http.post(
+        Uri.parse('http://cop4331-t23.xyz:5079/api/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'login': _loginController.text,
+          'password': _passwordController.text,
+        }),
       );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final objectId = responseData['user']
+            ['_id']; // Assuming response contains ObjectId here
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                HomePage(name: _loginController.text, objectId: objectId),
+          ),
+        );
+      } else {
+        throw Exception('Failed to login: ${response.body}');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login failed: $e")),
@@ -331,19 +348,34 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
     try {
-      await registerUser(
-        _firstNameController.text,
-        _lastNameController.text,
-        _emailController.text,
-        _loginController.text,
-        _passwordController.text,
+      final response = await http.post(
+        Uri.parse('http://cop4331-t23.xyz:5079/api/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'firstName': _firstNameController.text,
+          'lastName': _lastNameController.text,
+          'email': _emailController.text,
+          'login': _loginController.text,
+          'password': _passwordController.text,
+        }),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(name: _loginController.text),
-        ),
-      );
+
+      if (response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        final objectId = responseData['user']['_id'];
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              name: _loginController.text,
+              objectId: objectId,
+            ),
+          ),
+        );
+      } else {
+        throw Exception('Failed to register: ${response.body}');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Registration failed: $e")),
