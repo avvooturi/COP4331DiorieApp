@@ -56,7 +56,7 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     }
   }
 
-  Future<void> _updateMacroData(String search) async {
+  Future<void> _updateMacroData(String action) async {
     if (_caloriesController.text.isEmpty ||
         _proteinController.text.isEmpty ||
         _carbsController.text.isEmpty ||
@@ -79,7 +79,7 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     try {
       final response = await http.put(
         Uri.parse(
-            'http://cop4331-t23.xyz:5079/api/updatemacro/${widget.objectId}/$search'),
+            'http://cop4331-t23.xyz:5079/api/updatemacro/${widget.objectId}/$action'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(data),
       );
@@ -92,6 +92,41 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${response.body}')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _deleteMacro() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.delete(
+        Uri.parse(
+            'http://cop4331-t23.xyz:5079/api/deletemacro/${widget.objectId}'),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Macro deleted successfully!')),
+        );
+
+        // Clear the fields after deletion
+        setState(() {
+          _caloriesController.clear();
+          _proteinController.clear();
+          _carbsController.clear();
+          _fatController.clear();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error deleting macro: ${response.body}')),
         );
       }
     } catch (error) {
@@ -165,6 +200,11 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
                         ElevatedButton(
                           onPressed: () => _updateMacroData('S'),
                           child: const Text('Subtract Macros'),
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: _deleteMacro,
+                          child: const Text('Delete Macro'),
                         ),
                       ],
                     ),
