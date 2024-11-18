@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_meal_page.dart';
+import 'update_meal_page.dart'; // Import the new page
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -20,7 +21,7 @@ class _FoodLogPageState extends State<FoodLogPage> {
   @override
   void initState() {
     super.initState();
-    _fetchMeals(); // Fetch all meals on initialization
+    _fetchMeals();
   }
 
   Future<void> _fetchMeals({String? query}) async {
@@ -49,6 +50,58 @@ class _FoodLogPageState extends State<FoodLogPage> {
       }
     } catch (e) {
       print('Error: $e');
+    }
+  }
+
+  void _navigateToUpdateMealPage(Map<String, dynamic> meal) async {
+    final updatedMeal = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateMealPage(
+          meal: meal,
+        ),
+      ),
+    );
+
+    if (updatedMeal != null) {
+      setState(() {
+        final index =
+            displayedMeals.indexWhere((m) => m['_id'] == updatedMeal['_id']);
+        if (index != -1) {
+          displayedMeals[index] = updatedMeal;
+        }
+      });
+    }
+  }
+
+  Future<void> _navigateToAddMealPage() async {
+    final newMeal = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddMealPage(userId: widget.objectId),
+      ),
+    );
+
+    if (newMeal != null) {
+      setState(() {
+        displayedMeals.add(newMeal);
+      });
+
+      try {
+        final response = await http.post(
+          Uri.parse('http://cop4331-t23.xyz:5079/api/createmeal'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(newMeal),
+        );
+
+        if (response.statusCode == 201) {
+          print('Meal successfully added to the database');
+        } else {
+          print('Failed to add meal to the database: ${response.body}');
+        }
+      } catch (error) {
+        print('Error adding meal to the database: $error');
+      }
     }
   }
 
@@ -85,30 +138,11 @@ class _FoodLogPageState extends State<FoodLogPage> {
                 final meal = displayedMeals[index];
                 return ListTile(
                   title: Text(meal['name']),
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(meal['name']),
-                        content: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Calories: ${meal['cal']}'),
-                            Text('Fat: ${meal['fat']}g'),
-                            Text('Protein: ${meal['prot']}g'),
-                            Text('Carbs: ${meal['carb']}g'),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  onTap: () => _navigateToUpdateMealPage(meal),
+                  trailing: IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () => _navigateToUpdateMealPage(meal),
+                  ),
                 );
               },
             ),
@@ -121,37 +155,5 @@ class _FoodLogPageState extends State<FoodLogPage> {
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  Future<void> _navigateToAddMealPage() async {
-    final newMeal = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddMealPage(userId: widget.objectId),
-      ),
-    );
-
-    if (newMeal != null) {
-      setState(() {
-        displayedMeals.add(newMeal);
-      });
-
-      // Send meal to backend
-      try {
-        final response = await http.post(
-          Uri.parse('http://cop4331-t23.xyz:5079/api/createmeal'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(newMeal),
-        );
-
-        if (response.statusCode == 201) {
-          print('Meal successfully added to the database');
-        } else {
-          print('Failed to add meal to the database: ${response.body}');
-        }
-      } catch (error) {
-        print('Error adding meal to the database: $error');
-      }
-    }
   }
 }
