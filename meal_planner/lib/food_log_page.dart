@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_meal_page.dart';
-import 'update_meal_page.dart'; // Import the new page
+import 'update_meal_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -47,6 +47,31 @@ class _FoodLogPageState extends State<FoodLogPage> {
         }
       } else {
         print('Error fetching meals: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> _deleteMeal(String mealId) async {
+    final url = Uri.parse('http://cop4331-t23.xyz:5079/api/deletemeal/$mealId');
+
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['success'] == true) {
+          setState(() {
+            displayedMeals.removeWhere((meal) => meal['_id'] == mealId);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Meal successfully deleted.')),
+          );
+        } else {
+          print('Failed to delete meal: ${jsonResponse['message']}');
+        }
+      } else {
+        print('Error deleting meal: ${response.body}');
       }
     } catch (e) {
       print('Error: $e');
@@ -139,9 +164,18 @@ class _FoodLogPageState extends State<FoodLogPage> {
                 return ListTile(
                   title: Text(meal['name']),
                   onTap: () => _navigateToUpdateMealPage(meal),
-                  trailing: IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () => _navigateToUpdateMealPage(meal),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _navigateToUpdateMealPage(meal),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _deleteMeal(meal['_id']),
+                      ),
+                    ],
                   ),
                 );
               },
