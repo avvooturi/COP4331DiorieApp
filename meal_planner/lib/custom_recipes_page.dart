@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class CustomRecipesPage extends StatefulWidget {
-  const CustomRecipesPage({Key? key}) : super(key: key);
+  final String objectId;
+
+  const CustomRecipesPage({Key? key, required this.objectId}) : super(key: key);
 
   @override
   _CustomRecipesPageState createState() => _CustomRecipesPageState();
@@ -13,7 +17,7 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
   final TextEditingController _carbsController = TextEditingController();
   final TextEditingController _fatController = TextEditingController();
 
-  void _submitData() {
+  Future<void> _submitData() async {
     if (_caloriesController.text.isEmpty ||
         _proteinController.text.isEmpty ||
         _carbsController.text.isEmpty ||
@@ -25,20 +29,38 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     }
 
     final data = {
+      'userId': widget.objectId,
       'calories': double.tryParse(_caloriesController.text) ?? 0.0,
       'protein': double.tryParse(_proteinController.text) ?? 0.0,
       'carbs': double.tryParse(_carbsController.text) ?? 0.0,
       'fat': double.tryParse(_fatController.text) ?? 0.0,
     };
 
-    // Print data for now, replace with API call or database storage
-    print('User data submitted: $data');
+    try {
+      final response = await http.post(
+        Uri.parse('http://cop4331-t23.xyz:5079/api/createmacro'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Data successfully submitted!')),
-    );
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Macro details saved successfully!')),
+        );
+        _clearFields();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.body}')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
+    }
+  }
 
-    // Clear the fields after submission
+  void _clearFields() {
     _caloriesController.clear();
     _proteinController.clear();
     _carbsController.clear();
