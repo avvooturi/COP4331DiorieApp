@@ -215,7 +215,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 }
 
-// LoginPage Class
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -268,19 +267,43 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login")),
+      appBar: AppBar(
+        backgroundColor: Colors.green, // Navbar background color
+        title: Text(
+          "Di-orie",
+          style: TextStyle(
+            color: Colors.black, // Navbar text color
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _loginController,
-              decoration: InputDecoration(labelText: "Login"),
+              decoration: InputDecoration(
+                labelText: "Login",
+                labelStyle: TextStyle(color: Colors.green), // Label text green
+                focusedBorder: UnderlineInputBorder(
+                  borderSide:
+                      BorderSide(color: Colors.green), // Focus border color
+                ),
+              ),
+              style: TextStyle(color: Colors.white), // Input text color white
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: "Password"),
+              decoration: InputDecoration(
+                labelText: "Password",
+                labelStyle: TextStyle(color: Colors.green), // Label text green
+                focusedBorder: UnderlineInputBorder(
+                  borderSide:
+                      BorderSide(color: Colors.green), // Focus border color
+                ),
+              ),
               obscureText: true,
+              style: TextStyle(color: Colors.white), // Input text color white
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -296,7 +319,10 @@ class _LoginPageState extends State<LoginPage> {
                   MaterialPageRoute(builder: (context) => RegisterPage()),
                 );
               },
-              child: Text("Don't have an account? Register here"),
+              child: Text(
+                "Don't have an account? Register here",
+                style: TextStyle(color: Colors.green), // Green link color
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -305,36 +331,35 @@ class _LoginPageState extends State<LoginPage> {
                   MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
                 );
               },
-              child: Text("Forgot Password?"),
+              child: Text(
+                "Forgot Password?",
+                style: TextStyle(color: Colors.green), // Green link color
+              ),
             ),
           ],
         ),
       ),
+      backgroundColor: Colors.black, // Background color for LoginPage
     );
   }
 }
 
-// RegisterPage Class
 class RegisterPage extends StatefulWidget {
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _loginController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
-    _loginController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -343,36 +368,28 @@ class _RegisterPageState extends State<RegisterPage> {
   void _register() async {
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
+        SnackBar(content: Text("Passwords do not match")),
       );
       return;
     }
+
     try {
       final response = await http.post(
         Uri.parse('http://cop4331-t23.xyz:5079/api/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'firstName': _firstNameController.text,
-          'lastName': _lastNameController.text,
+          'username': _usernameController.text,
           'email': _emailController.text,
-          'login': _loginController.text,
           'password': _passwordController.text,
         }),
       );
 
-      if (response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
-        final objectId = responseData['user']['_id'];
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(
-              name: _loginController.text,
-              objectId: objectId,
-            ),
-          ),
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration successful! Please log in.")),
         );
+
+        Navigator.pop(context);
       } else {
         throw Exception('Failed to register: ${response.body}');
       }
@@ -386,47 +403,80 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Register")),
+      appBar: AppBar(
+        backgroundColor: Colors.green, // Navbar background color
+        title: Text(
+          "Di-orie",
+          style: TextStyle(
+            color: Colors.black, // Navbar text color
+          ),
+        ),
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _firstNameController,
-              decoration: InputDecoration(labelText: "First Name"),
-            ),
-            TextField(
-              controller: _lastNameController,
-              decoration: InputDecoration(labelText: "Last Name"),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: "Email"),
-            ),
-            TextField(
-              controller: _loginController,
-              decoration: InputDecoration(labelText: "Login"),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: "Password"),
-              obscureText: true,
-            ),
-            TextField(
-              controller: _confirmPasswordController,
-              decoration: InputDecoration(labelText: "Confirm Password"),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _register,
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.green[800]),
-              child: Text("Register"),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: "Username",
+                  labelStyle:
+                      TextStyle(color: Colors.green), // Label text green
+                ),
+                style: TextStyle(color: Colors.white), // Input text white
+              ),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  labelStyle:
+                      TextStyle(color: Colors.green), // Label text green
+                ),
+                style: TextStyle(color: Colors.white), // Input text white
+              ),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  labelStyle:
+                      TextStyle(color: Colors.green), // Label text green
+                ),
+                obscureText: true,
+                style: TextStyle(color: Colors.white), // Input text white
+              ),
+              TextField(
+                controller: _confirmPasswordController,
+                decoration: InputDecoration(
+                  labelText: "Confirm Password",
+                  labelStyle:
+                      TextStyle(color: Colors.green), // Label text green
+                ),
+                obscureText: true,
+                style: TextStyle(color: Colors.white), // Input text white
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _register,
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[800]),
+                child: Text("Register"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Already have an account? Log in here",
+                  style: TextStyle(color: Colors.green), // Green link color
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+      backgroundColor: Colors.black, // Background color for RegisterPage
     );
   }
 }
