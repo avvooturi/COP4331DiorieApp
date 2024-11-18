@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return FoodLogPage(meals: _meals, objectId: widget.objectId);
       case 3:
-        return CustomRecipesPage(onRecipeAdded: _addRecipeToCalendar);
+        return const CustomRecipesPage(); // No onRecipeAdded parameter
       case 4:
         return CalendarPage(scheduledRecipes: _calendarRecipes);
       default:

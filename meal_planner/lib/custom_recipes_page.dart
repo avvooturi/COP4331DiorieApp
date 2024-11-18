@@ -1,79 +1,55 @@
-// lib/custom_recipes_page.dart
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class CustomRecipesPage extends StatefulWidget {
-  final Function(Map<String, dynamic>) onRecipeAdded;
-
-  const CustomRecipesPage({Key? key, required this.onRecipeAdded})
-      : super(key: key);
+  const CustomRecipesPage({Key? key}) : super(key: key);
 
   @override
   _CustomRecipesPageState createState() => _CustomRecipesPageState();
 }
 
 class _CustomRecipesPageState extends State<CustomRecipesPage> {
-  final TextEditingController _recipeNameController = TextEditingController();
-  final TextEditingController _servingsController = TextEditingController();
-  DateTime? _selectedDate;
-  final List<Map<String, dynamic>> _ingredients = [];
-  final List<Map<String, dynamic>> _recipes = [];
+  final TextEditingController _caloriesController = TextEditingController();
+  final TextEditingController _proteinController = TextEditingController();
+  final TextEditingController _carbsController = TextEditingController();
+  final TextEditingController _fatController = TextEditingController();
 
-  Future<void> _pickDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  void _addIngredient(String name, double calories) {
-    setState(() {
-      _ingredients.add({
-        'name': name,
-        'calories': calories,
-      });
-    });
-  }
-
-  void _addRecipe() {
-    if (_recipeNameController.text.isEmpty || _selectedDate == null) {
+  void _submitData() {
+    if (_caloriesController.text.isEmpty ||
+        _proteinController.text.isEmpty ||
+        _carbsController.text.isEmpty ||
+        _fatController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all fields.')),
+      );
       return;
     }
 
-    final recipe = {
-      'name': _recipeNameController.text,
-      'ingredients': List<Map<String, dynamic>>.from(_ingredients),
-      'servings': _servingsController.text,
-      'date':
-          _selectedDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
+    final data = {
+      'calories': double.tryParse(_caloriesController.text) ?? 0.0,
+      'protein': double.tryParse(_proteinController.text) ?? 0.0,
+      'carbs': double.tryParse(_carbsController.text) ?? 0.0,
+      'fat': double.tryParse(_fatController.text) ?? 0.0,
     };
 
-    setState(() {
-      _recipes.add(recipe);
-      _ingredients.clear(); // Clear ingredients for next recipe
-    });
+    // Print data for now, replace with API call or database storage
+    print('User data submitted: $data');
 
-    widget.onRecipeAdded(recipe); // Add the recipe to the calendar
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Data successfully submitted!')),
+    );
 
-    // Clear fields after recipe is added
-    _recipeNameController.clear();
-    _servingsController.clear();
-    _selectedDate = null;
+    // Clear the fields after submission
+    _caloriesController.clear();
+    _proteinController.clear();
+    _carbsController.clear();
+    _fatController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Custom Recipes'),
+        title: const Text('Daily Nutrient Intake'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -81,39 +57,37 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              controller: _recipeNameController,
-              decoration: const InputDecoration(labelText: 'Recipe Name'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _servingsController,
-              decoration: const InputDecoration(labelText: 'Servings'),
+              controller: _caloriesController,
+              decoration:
+                  const InputDecoration(labelText: 'Calories Consumed Today'),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _pickDate(context),
-              child: const Text('Select Date'),
+            TextField(
+              controller: _proteinController,
+              decoration: const InputDecoration(
+                  labelText: 'Protein (g) Consumed Today'),
+              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 10),
-            Text(
-                'Selected Date: ${_selectedDate != null ? DateFormat.yMMMd().format(_selectedDate!) : 'None'}'),
+            TextField(
+              controller: _carbsController,
+              decoration:
+                  const InputDecoration(labelText: 'Carbs (g) Consumed Today'),
+              keyboardType: TextInputType.number,
+            ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _addRecipe,
-              child: const Text('Add Recipe'),
+            TextField(
+              controller: _fatController,
+              decoration:
+                  const InputDecoration(labelText: 'Fat (g) Consumed Today'),
+              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _recipes.length,
-                itemBuilder: (context, index) {
-                  final recipe = _recipes[index];
-                  return ListTile(
-                    title: Text(recipe['name']),
-                    subtitle: Text('Date: ${recipe['date']}'),
-                  );
-                },
+            Center(
+              child: ElevatedButton(
+                onPressed: _submitData,
+                child: const Text('Submit'),
               ),
             ),
           ],
