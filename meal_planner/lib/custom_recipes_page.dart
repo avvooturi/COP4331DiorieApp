@@ -28,23 +28,53 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await http.get(
+      // Attempt to fetch macro data
+      final macroResponse = await http.get(
         Uri.parse(
             'http://cop4331-t23.xyz:5079/api/getmacro/${widget.objectId}'),
       );
 
-      if (response.statusCode == 200) {
-        final macroData = jsonDecode(response.body)['Macro'];
+      if (macroResponse.statusCode == 200) {
+        // If Macros table exists, populate fields with its data
+        final macroData = jsonDecode(macroResponse.body)['Macro'];
         setState(() {
           _caloriesController.text = macroData['cal'].toString();
           _proteinController.text = macroData['prot'].toString();
           _carbsController.text = macroData['carb'].toString();
           _fatController.text = macroData['fat'].toString();
         });
+      } else if (macroResponse.statusCode == 404) {
+        // Macros table doesn't exist, fetch User-Health data
+        final healthResponse = await http.get(
+          Uri.parse(
+              'http://cop4331-t23.xyz:5079/api/getuserhealth/${widget.objectId}'),
+        );
+
+        if (healthResponse.statusCode == 200) {
+          final userHealth = jsonDecode(healthResponse.body)['UserHealth'];
+          setState(() {
+            _caloriesController.text = userHealth['cal'].toString();
+            _proteinController.text = userHealth['prot'].toString();
+            _carbsController.text = userHealth['carb'].toString();
+            _fatController.text = userHealth['fat'].toString();
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    'Macros table not found. Pre-filled with User-Health data.')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    'Error fetching User-Health data: ${healthResponse.body}')),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Error fetching macro data: ${response.body}')),
+              content:
+                  Text('Error fetching macro data: ${macroResponse.body}')),
         );
       }
     } catch (error) {
@@ -56,7 +86,7 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     }
   }
 
-  Future<void> _updateMacroData(String action) async {
+  Future<void> _updateMacroData(String search) async {
     if (_caloriesController.text.isEmpty ||
         _proteinController.text.isEmpty ||
         _carbsController.text.isEmpty ||
@@ -79,7 +109,7 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     try {
       final response = await http.put(
         Uri.parse(
-            'http://cop4331-t23.xyz:5079/api/updatemacro/${widget.objectId}/$action'),
+            'http://cop4331-t23.xyz:5079/api/updatemacro/${widget.objectId}/$search'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(data),
       );
@@ -92,41 +122,6 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${response.body}')),
-        );
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _deleteMacro() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final response = await http.delete(
-        Uri.parse(
-            'http://cop4331-t23.xyz:5079/api/deletemacro/${widget.objectId}'),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Macro deleted successfully!')),
-        );
-
-        // Clear the fields after deletion
-        setState(() {
-          _caloriesController.clear();
-          _proteinController.clear();
-          _carbsController.clear();
-          _fatController.clear();
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting macro: ${response.body}')),
         );
       }
     } catch (error) {
@@ -200,11 +195,6 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
                         ElevatedButton(
                           onPressed: () => _updateMacroData('S'),
                           child: const Text('Subtract Macros'),
-                        ),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: _deleteMacro,
-                          child: const Text('Delete Macro'),
                         ),
                       ],
                     ),
