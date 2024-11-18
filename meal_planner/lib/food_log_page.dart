@@ -5,32 +5,135 @@ import 'dart:convert';
 
 class FoodLogPage extends StatefulWidget {
   final List<Map<String, dynamic>> meals;
-  final String objectId; // Add this line
+  final String objectId;
 
-  const FoodLogPage(
-      {super.key,
-      required this.meals,
-      required this.objectId}); // Update constructor
+  const FoodLogPage({Key? key, required this.meals, required this.objectId});
 
   @override
   State<FoodLogPage> createState() => _FoodLogPageState();
 }
 
 class _FoodLogPageState extends State<FoodLogPage> {
-  List<Map<String, dynamic>> get meals => widget.meals;
+  List<Map<String, dynamic>> displayedMeals = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMeals(); // Fetch all meals on initialization
+  }
+
+  Future<void> _fetchMeals({String? query}) async {
+    final url = Uri.parse('http://cop4331-t23.xyz:5079/api/searchmeal')
+        .replace(queryParameters: {
+      'userId': widget.objectId,
+      'search': query ?? '',
+    });
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['success'] == true) {
+          setState(() {
+            displayedMeals =
+                List<Map<String, dynamic>>.from(jsonResponse['meals'] ?? []);
+          });
+        } else {
+          setState(() {
+            displayedMeals = [];
+          });
+        }
+      } else {
+        print('Error fetching meals: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Food Log'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search Meals',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    _fetchMeals(query: _searchController.text);
+                  },
+                ),
+              ),
+              onSubmitted: (value) {
+                _fetchMeals(query: value);
+              },
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: displayedMeals.length,
+              itemBuilder: (context, index) {
+                final meal = displayedMeals[index];
+                return ListTile(
+                  title: Text(meal['name']),
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(meal['name']),
+                        content: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Calories: ${meal['cal']}'),
+                            Text('Fat: ${meal['fat']}g'),
+                            Text('Protein: ${meal['prot']}g'),
+                            Text('Carbs: ${meal['carb']}g'),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAddMealPage,
+        tooltip: 'Add Meal',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 
   Future<void> _navigateToAddMealPage() async {
     final newMeal = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            AddMealPage(userId: widget.objectId), // Pass objectId here
+        builder: (context) => AddMealPage(userId: widget.objectId),
       ),
     );
 
     if (newMeal != null) {
       setState(() {
-        meals.add(newMeal);
+        displayedMeals.add(newMeal);
       });
 
       // Send meal to backend
@@ -50,52 +153,5 @@ class _FoodLogPageState extends State<FoodLogPage> {
         print('Error adding meal to the database: $error');
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Food Log'),
-      ),
-      body: ListView.builder(
-        itemCount: meals.length,
-        itemBuilder: (context, index) {
-          final meal = meals[index];
-          return ListTile(
-            title: Text(meal['name']),
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(meal['name']),
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Calories: ${meal['cal']}'),
-                      Text('Fat: ${meal['fat']}g'),
-                      Text('Protein: ${meal['prot']}g'),
-                      Text('Carbs: ${meal['carb']}g'),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddMealPage,
-        tooltip: 'Add Meal',
-        child: const Icon(Icons.add),
-      ),
-    );
   }
 }
