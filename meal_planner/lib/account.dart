@@ -153,91 +153,125 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String labelText,
+    required String validatorMessage,
+  }) {
+    return Column(
+      children: [
+        TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: labelText,
+            labelStyle: const TextStyle(color: Colors.white),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.green),
+            ),
+          ),
+          style: const TextStyle(color: Colors.white),
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return validatorMessage;
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 20), // Spacing between fields
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Account")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Hi ${widget.name}, update your daily intake below:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Form(
-              key: _formKey,
+      appBar: AppBar(
+        title: const Text("Account"),
+        backgroundColor: Colors.green[800],
+      ),
+      body: Container(
+        color: Colors.black, // Full black background
+        child: Center(
+          // Ensures the content is properly centered in the remaining space
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height -
+                    AppBar().preferredSize.height,
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextFormField(
-                    controller: _calorieController,
-                    decoration:
-                        InputDecoration(labelText: 'Calories (kcal/day)'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your daily calorie intake';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _carbsController,
-                    decoration:
-                        InputDecoration(labelText: 'Carbohydrates (g/day)'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your daily carbohydrate intake';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _proteinController,
-                    decoration: InputDecoration(labelText: 'Protein (g/day)'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your daily protein intake';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _fatController,
-                    decoration: InputDecoration(labelText: 'Fat (g/day)'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your daily fat intake';
-                      }
-                      return null;
-                    },
+                  Text(
+                    'Hi ${widget.name}, update your daily intake below:',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _submitForm,
-                    child: Text(_isUserHealthInitialized
-                        ? 'Update Details'
-                        : 'Save Details'),
-                  ),
-                  if (_isUserHealthInitialized) ...[
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: _deleteUserHealth,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      child: Text('Delete Details'),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        _buildInputField(
+                          controller: _calorieController,
+                          labelText: 'Calories (kcal/day)',
+                          validatorMessage:
+                              'Please enter your daily calorie intake',
+                        ),
+                        _buildInputField(
+                          controller: _carbsController,
+                          labelText: 'Carbohydrates (g/day)',
+                          validatorMessage:
+                              'Please enter your daily carbohydrate intake',
+                        ),
+                        _buildInputField(
+                          controller: _proteinController,
+                          labelText: 'Protein (g/day)',
+                          validatorMessage:
+                              'Please enter your daily protein intake',
+                        ),
+                        _buildInputField(
+                          controller: _fatController,
+                          labelText: 'Fat (g/day)',
+                          validatorMessage:
+                              'Please enter your daily fat intake',
+                        ),
+                        ElevatedButton(
+                          onPressed: _submitForm,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green[800],
+                          ),
+                          child: Text(
+                            _isUserHealthInitialized
+                                ? 'Update Details'
+                                : 'Save Details',
+                          ),
+                        ),
+                        if (_isUserHealthInitialized) ...[
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: _deleteUserHealth,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: const Text('Delete Details'),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

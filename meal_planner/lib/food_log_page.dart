@@ -78,27 +78,6 @@ class _FoodLogPageState extends State<FoodLogPage> {
     }
   }
 
-  void _navigateToUpdateMealPage(Map<String, dynamic> meal) async {
-    final updatedMeal = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UpdateMealPage(
-          meal: meal,
-        ),
-      ),
-    );
-
-    if (updatedMeal != null) {
-      setState(() {
-        final index =
-            displayedMeals.indexWhere((m) => m['_id'] == updatedMeal['_id']);
-        if (index != -1) {
-          displayedMeals[index] = updatedMeal;
-        }
-      });
-    }
-  }
-
   Future<void> _navigateToAddMealPage() async {
     final newMeal = await Navigator.push(
       context,
@@ -111,22 +90,26 @@ class _FoodLogPageState extends State<FoodLogPage> {
       setState(() {
         displayedMeals.add(newMeal);
       });
+    }
+  }
 
-      try {
-        final response = await http.post(
-          Uri.parse('http://cop4331-t23.xyz:5079/api/createmeal'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(newMeal),
-        );
+  Future<void> _navigateToUpdateMealPage(Map<String, dynamic> meal) async {
+    final updatedMeal = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateMealPage(meal: meal),
+      ),
+    );
 
-        if (response.statusCode == 201) {
-          print('Meal successfully added to the database');
-        } else {
-          print('Failed to add meal to the database: ${response.body}');
+    if (updatedMeal != null) {
+      setState(() {
+        // Update the meal in the displayedMeals list
+        final index =
+            displayedMeals.indexWhere((m) => m['_id'] == updatedMeal['_id']);
+        if (index != -1) {
+          displayedMeals[index] = updatedMeal;
         }
-      } catch (error) {
-        print('Error adding meal to the database: $error');
-      }
+      });
     }
   }
 
@@ -135,57 +118,74 @@ class _FoodLogPageState extends State<FoodLogPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Food Log'),
+        backgroundColor: Colors.green[800],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Search Meals',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    _fetchMeals(query: _searchController.text);
-                  },
-                ),
-              ),
-              onSubmitted: (value) {
-                _fetchMeals(query: value);
-              },
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: displayedMeals.length,
-              itemBuilder: (context, index) {
-                final meal = displayedMeals[index];
-                return ListTile(
-                  title: Text(meal['name']),
-                  onTap: () => _navigateToUpdateMealPage(meal),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _navigateToUpdateMealPage(meal),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _deleteMeal(meal['_id']),
-                      ),
-                    ],
+      body: Container(
+        color: Colors.black, // Full black background
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _searchController,
+                style: const TextStyle(color: Colors.white), // White text
+                decoration: InputDecoration(
+                  labelText: 'Search Meals',
+                  labelStyle: const TextStyle(color: Colors.white),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
                   ),
-                );
-              },
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.search, color: Colors.white),
+                    onPressed: () {
+                      _fetchMeals(query: _searchController.text);
+                    },
+                  ),
+                ),
+                onSubmitted: (value) {
+                  _fetchMeals(query: value);
+                },
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: ListView.builder(
+                itemCount: displayedMeals.length,
+                itemBuilder: (context, index) {
+                  final meal = displayedMeals[index];
+                  return Card(
+                    color: Colors.grey[850], // Dark background for list items
+                    child: ListTile(
+                      title: Text(
+                        meal['name'],
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.green),
+                            onPressed: () => _navigateToUpdateMealPage(meal),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteMeal(meal['_id']),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddMealPage,
-        tooltip: 'Add Meal',
+        backgroundColor: Colors.green[800], // Green button
         child: const Icon(Icons.add),
       ),
     );
