@@ -29,23 +29,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _navigateToFoodLogPage() async {
-    final newMeal = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FoodLogPage(
-          meals: _meals,
-          objectId: widget.objectId,
-        ),
-      ),
-    );
-    if (newMeal != null) {
-      setState(() {
-        _meals.add(newMeal);
-      });
-    }
-  }
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -61,7 +44,7 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return FoodLogPage(meals: _meals, objectId: widget.objectId);
       case 3:
-        return CustomRecipesPage(objectId: widget.objectId); // No onRecipeAdded parameter
+        return CustomRecipesPage(objectId: widget.objectId);
       case 4:
         return CalendarPage(scheduledRecipes: _calendarRecipes);
       default:
@@ -70,21 +53,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomePage() {
-    return Center(
-      child: Padding(
+    return Container(
+      color: Colors.black, // Black background for the entire page
+      constraints:
+          BoxConstraints.expand(), // Make the container fill the screen
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hi ${widget.name}, please input the meals you eat into the food log!',
-              style: const TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
+              'Welcome, ${widget.name}!',
+              style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _navigateToFoodLogPage,
-              child: const Text('Go to Food Log'),
+            const Text(
+              'This app helps you track your calorie intake and meals throughout the day, '
+              'so you can meet your dietary goals effectively.',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            const SizedBox(height: 20),
+            const Divider(color: Colors.white),
+            const SizedBox(height: 20),
+            _buildFeatureSection(
+              icon: Icons.fastfood,
+              title: 'Food Log',
+              description:
+                  'Log the meals you eat throughout the day. Track their calorie content to monitor your daily intake.',
+            ),
+            const SizedBox(height: 20),
+            _buildFeatureSection(
+              icon: Icons.receipt,
+              title: 'Custom Recipes',
+              description:
+                  'Create custom recipes, calculate their total calories, and save them for future use.',
+            ),
+            const SizedBox(height: 20),
+            _buildFeatureSection(
+              icon: Icons.account_circle,
+              title: 'Account',
+              description:
+                  'View and update your personal information or dietary preferences.',
             ),
           ],
         ),
@@ -92,13 +104,53 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildFeatureSection({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 32, color: Colors.green[800]),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: const TextStyle(fontSize: 14, color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        backgroundColor: Colors.green[800],
+        title: const Text(
+          'Home',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
-      body: _buildPage(),
+      body: Container(
+        color: Colors.black,
+        child: _buildPage(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -117,14 +169,11 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.receipt),
             label: 'Recipes',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.green[800],
-        unselectedItemColor: Colors.green, // Set this to make all items green
+        unselectedItemColor: Colors.green,
+        backgroundColor: Colors.black,
         onTap: _onItemTapped,
       ),
     );
