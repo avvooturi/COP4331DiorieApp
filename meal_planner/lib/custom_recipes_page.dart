@@ -28,14 +28,12 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Attempt to fetch macro data
       final macroResponse = await http.get(
         Uri.parse(
             'http://cop4331-t23.xyz:5079/api/getmacro/${widget.objectId}'),
       );
 
       if (macroResponse.statusCode == 200) {
-        // If Macros table exists, populate fields with its data
         final macroData = jsonDecode(macroResponse.body)['Macro'];
         setState(() {
           _caloriesController.text = macroData['cal'].toString();
@@ -44,7 +42,6 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
           _fatController.text = macroData['fat'].toString();
         });
       } else if (macroResponse.statusCode == 404) {
-        // Macros table doesn't exist, fetch User-Health data
         final healthResponse = await http.get(
           Uri.parse(
               'http://cop4331-t23.xyz:5079/api/getuserhealth/${widget.objectId}'),
@@ -138,70 +135,122 @@ class _CustomRecipesPageState extends State<CustomRecipesPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daily Nutrient Intake'),
+        backgroundColor: Colors.green[800],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: _caloriesController,
-                    decoration: const InputDecoration(
-                        labelText: 'Calories Consumed Today'),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _proteinController,
-                    decoration: const InputDecoration(
-                        labelText: 'Protein (g) Consumed Today'),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _carbsController,
-                    decoration: const InputDecoration(
-                        labelText: 'Carbs (g) Consumed Today'),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _fatController,
-                    decoration: const InputDecoration(
-                        labelText: 'Fat (g) Consumed Today'),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => _updateMacroData('CU'),
-                          child: const Text('Update Macros'),
+      body: Container(
+        color: Colors.black,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _caloriesController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Calories Consumed Today',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
                         ),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () => _updateMacroData('R'),
-                          child: const Text('Reset Macros'),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.green),
                         ),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () => _updateMacroData('A'),
-                          child: const Text('Add Macros'),
-                        ),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () => _updateMacroData('S'),
-                          child: const Text('Subtract Macros'),
-                        ),
-                      ],
+                      ),
+                      keyboardType: TextInputType.number,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _proteinController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Protein (g) Consumed Today',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _carbsController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Carbs (g) Consumed Today',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _fatController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Fat (g) Consumed Today',
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _updateMacroData('CU'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green[800],
+                            ),
+                            child: const Text('Update Macros'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: () => _updateMacroData('R'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green[800],
+                            ),
+                            child: const Text('Reset Macros'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: () => _updateMacroData('A'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green[800],
+                            ),
+                            child: const Text('Add Macros'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: () => _updateMacroData('S'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green[800],
+                            ),
+                            child: const Text('Subtract Macros'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

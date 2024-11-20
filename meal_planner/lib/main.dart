@@ -15,6 +15,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
+      // Define the routes here
+      routes: {
+        '/login': (context) => LoginPage(), // Named route for login page
+      },
       home: LoginPage(),
     );
   }
@@ -213,6 +217,35 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ),
     );
   }
+}
+
+void _logout(BuildContext context) {
+  // Show a confirmation dialog before logging out
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context)
+                  .pushReplacementNamed('/login'); // Navigate to login page
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 class LoginPage extends StatefulWidget {

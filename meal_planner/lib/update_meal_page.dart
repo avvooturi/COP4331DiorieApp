@@ -70,41 +70,105 @@ class _UpdateMealPageState extends State<UpdateMealPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Update Meal'),
+        backgroundColor: Colors.green[800],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Meal Name'),
-            ),
-            TextField(
-              controller: _caloriesController,
-              decoration: const InputDecoration(labelText: 'Calories'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _fatController,
-              decoration: const InputDecoration(labelText: 'Fat (g)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _proteinController,
-              decoration: const InputDecoration(labelText: 'Protein (g)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _carbsController,
-              decoration: const InputDecoration(labelText: 'Carbs (g)'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _updateMeal,
-              child: const Text('Update Meal'),
-            ),
-          ],
+      body: Container(
+        color: Colors.black, // Full black background
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _nameController,
+                style: const TextStyle(color: Colors.white), // White text
+                decoration: const InputDecoration(
+                  labelText: 'Meal Name',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _caloriesController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Calories',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _fatController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Fat (g)',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _proteinController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Protein (g)',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _carbsController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Carbs (g)',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _updateMeal,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[800], // Dark green button
+                  ),
+                  child: const Text('Update Meal'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

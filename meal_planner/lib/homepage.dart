@@ -143,9 +143,18 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.green[800],
         title: const Text(
-          'Home',
+          'Di-orie',
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () {
+              // Handle logout logic here
+              _logout(context);
+            },
+          ),
+        ],
       ),
       body: Container(
         color: Colors.black,
@@ -176,6 +185,35 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.black,
         onTap: _onItemTapped,
       ),
+    );
+  }
+
+  void _logout(BuildContext context) {
+    // Show a confirmation dialog before logging out
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pushReplacementNamed(
+                    '/login'); // Navigate to the login page
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
